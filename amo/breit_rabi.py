@@ -1,15 +1,13 @@
-from .constants import ahf, gI, gJ, mu_B, h
+from .constants import ahf, gI, gJ, mu_B, h, I
 import numpy as np
 
 
 def EhfFieldInTesla(B, F, mF):
     """Computes the hyperfine energy in Joules for a given magnetic field B (in Tesla),
     total angular momentum F, and its projection mF using the Breit-Rabi formula."""
-    term12 = -ahf/4 + gI * mu_B * mF * B 
-    term3 = (-1)**(F - 1/2) * (ahf * 9/2)/2 * np.sqrt( 
-        1 + (4 * mF)/(2 * 9/2) * (( (gJ - gI) * mu_B)/(ahf * 9/2) * B) \
-        + (( (gJ - gI) * mu_B)/(ahf * 9/2) * B)**2)
-    return term12 + term3
+    x = (gJ - gI) * mu_B * B / (ahf * (I + 1/2))
+    return -ahf/4 + gI * mu_B * mF * B + (-1)**(F - 1/2) * (ahf * (I + 1/2))/2 * np.sqrt( 
+        1 + (4 * mF)/(2*I + 1) * x + x**2)
 
 
 def Ehf(B, F, mF):
