@@ -27,14 +27,6 @@ def fermi_wavevector(n, omega_bar, dim=3, pol=1):
     return np.sqrt(2 * mK * fermi_energy(n, omega_bar, dim=dim, pol=pol))
 
 
-def resonant_scattering_length(B, B0, DeltaB, abg):
-    """Computes the resonant scattering length in meters for a given 
-    magnetic field B (in Gauss), resonance position B0 (in Gauss), 
-    resonance width DeltaB (in Gauss), and background scattering length 
-    abg (in meters)."""
-    return abg * (1 - DeltaB / (B - B0))
-
-
 def recoil_energy(lambda_):
     """Computes the recoil energy in Joules for a given wavelength 
     lambda (in meters)."""
