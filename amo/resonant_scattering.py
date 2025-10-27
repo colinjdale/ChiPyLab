@@ -7,7 +7,7 @@ References:
 """
 import numpy as np
 
-from amo.constants import R_max, V_bar, pi
+from amo.constants import R_max, V_bar, pi, hbar, mK
 from scipy.special import zeta
 from scipy.optimize import root_scalar
 
@@ -48,7 +48,7 @@ def inverse_effective_range(V, R0, Vbg, R_max=R_max):
     return -1/(R_max * width_param) * (1-Vbg/V)**2 + inv_R_vdW(V)
 
 
-def p_wave_phase_shift(k, V, inv_R):
+def pwave_phase_shift(k, V, inv_R):
     """Computes the p-wave phase shift delta_1 (in radians) for a given 
     wavevector k, scattering volume V, and effective range R, all typically
     in bohr radius."""
@@ -57,13 +57,26 @@ def p_wave_phase_shift(k, V, inv_R):
     return delta1
 
 
-def p_wave_scattering_amplitude(k, V, inv_R):
+def pwave_scattering_amplitude(k, V, inv_R):
     """Computes the p-wave scattering amplitude f_1 (in meters) for a 
     given wavevector k (in 1/m), scattering volume V (in m^3), and 
     effective range R (in m)."""
-    delta1 = p_wave_phase_shift(k, V, inv_R)
+    delta1 = pwave_phase_shift(k, V, inv_R)
     f1 = 1/k*np.exp(1j * delta1) * np.sin(delta1)
     return f1
+
+### p-wave bound state energy
+
+def pwave_bound_state_energy(V, inv_R):
+    if V < 0:
+        return hbar**2 /(mK * V * inv_R)
+    else: 
+        coeffs = [inv_R, 0, 1/V, 0]
+        roots = np.roots(coeffs)
+        # Find the real negative root.
+        kappa = np.real(roots[np.isreal(roots) & (np.real(roots) < 0)][0])
+        E_b = hbar**2 * kappa**2 / mK
+        return E_b
 
 
 ###
