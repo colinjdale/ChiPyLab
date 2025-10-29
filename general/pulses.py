@@ -1,6 +1,7 @@
 import numpy as np
 from scipy.constants import pi
 
+
 def blackman_pulse(t, t_width, alpha=0.16):
     a0, a1, a2 = (1 - alpha)/2, 0.5, alpha/2
     def blackman(t):
