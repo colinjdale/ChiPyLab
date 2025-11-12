@@ -348,7 +348,7 @@ class BulkViscTrap:
         self.tau = 1/tau_inv(self.betamutrap, self.T)
         self.Ns, self.EF, self.Theta, Epot = thermo_trap(self.T, self.betamutrap, self.betabaromega)
 
-        self.kF = np.sqrt(2*pi*mK*self.EF/hbar) # global k_F, i.e. peak k_F
+        self.kF = np.sqrt(4*pi*mK*self.EF/hbar) # global k_F, i.e. peak k_F
         self.Etotal = 2*Epot # virial theorem valid at unitarity, 
         # but we have to decide if we want to normalize the trap heating rate by the total or by the internal energy
         self.EdotDrude = self.A**2*np.array([heating_trap(self.T,self.betamutrap,
@@ -411,8 +411,9 @@ def trap_averaged_contact(ToTF, EF, barnu):
     T = ToTF * EF
     betabaromega = barnu/T
     lambda_T = np.sqrt(hbar/(mK*T))
-    kF = np.sqrt(2*pi*mK*EF/hbar)  # Global k_F, here peak k_F of harmonic trap
+    kF = np.sqrt(4*pi*mK*EF/hbar)  # Global k_F, here peak k_F of harmonic trap
     
+
     betamutrap, no_iter = find_betamu(T, ToTF, betabaromega)
     
     # Calculate number of atoms in one spin.
@@ -430,7 +431,7 @@ def trap_averaged_contact_slope(ToTF, EF, barnu):
        (geometric mean trap freq) and an optional guess mu. Returns the contact."""
     T = ToTF * EF
     betabaromega = barnu/T
-    kF = np.sqrt(2*pi*mK*EF/hbar)  # Global k_F, here peak k_F of harmonic trap
+    kF = np.sqrt(4*pi*mK*EF/hbar)  # Global k_F, here peak k_F of harmonic trap
     betamutrap, no_iter = find_betamu(T, ToTF, betabaromega)
     
     # Calculate C slope
