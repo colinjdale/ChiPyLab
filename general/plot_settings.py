@@ -18,9 +18,9 @@ paper_settings = {
 				'ytick.labelsize': 7,      # Tick label font size (y-axis)
 				'legend.fontsize': 8,      # Legend font size
 				'figure.figsize': figsize, 
-				'figure.dpi': 300,        # Publication-ready resolution
+				'figure.dpi': 200,        # Publication-ready resolution
 				'lines.linewidth': 1,      # Thinner lines for compactness
-				"lines.linestyle":'',
+				"lines.linestyle":'-',
 				'axes.linewidth': 0.5,      # Thin axis spines
 				'xtick.major.width': 0.5,    # Tick mark width
 				'ytick.major.width': 0.5,
