@@ -26,3 +26,18 @@ def blackman_fourier(nu, t_width, alpha=0.16):
     return t_width*(a0*np.sinc(t_width*nu) 
             + a1/2*(shifted_sinc(nu, t_width, 1) + shifted_sinc(nu, t_width, -1))
             + a2/2*(shifted_sinc(nu, t_width, 2) + shifted_sinc(nu, t_width, -2)))
+
+
+# def blackman_instrument(nu, t_width):
+#     """Analytic solution of the Blackman Fourier transform. Obtained from
+#        https://mathworld.wolfram.com/BlackmanFunction.html."""
+#     a = t_width/2
+#     return a * (0.84 - 0.36 * a**2 * nu**2)*np.sinc(2 * a * nu) \
+#             / ((1 - a**2 * nu**2) * (1 - 4 * a**2 * nu**2))
+
+
+def blackman_instrument(nu, t_width):
+    """Analytic solution of the Blackman Fourier transform. Obtained from
+       https://mathworld.wolfram.com/BlackmanFunction.html."""
+    return 4 * t_width * (0.42 - 0.18/4 * t_width**2 * nu**2)*np.sinc(t_width * nu) \
+            / ((4 - t_width**2 * nu**2) * (1 - t_width**2 * nu**2))
