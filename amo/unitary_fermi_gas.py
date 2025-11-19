@@ -336,7 +336,7 @@ class TrappedUnitaryGas:
 
         # Compute trap properties
         self.gamma = gamma(self.betamu, self.T)
-        self.tau = 1/self.gamma * 2*pi
+        self.tau = 1/(self.gamma * 2*pi)
         self.Ns, self.EF, self.Theta, self.Epot = thermo_trap(self.T, self.betamu, self.betabaromega)
 
         # Self-consistency checks of EF and Theta:
@@ -406,9 +406,9 @@ class TrappedUnitaryGas:
         self.EdotDrudeS = self.EdotDrude / self.sumruletrap
         self.EdotDrudeSalt = self.A**2*np.array([heating_trap_sumrule(self.T,self.betamu, 
                             betaomega, self.betabaromega) for betaomega in betaomegas])
-        self.phaseshiftsQcrit = np.arctan(self.nus * self.tau / (1 + (self.nus*self.tau)**2))
+        self.phaseshiftsQcrit = np.arctan(2*pi*self.nus * self.tau / (1 + (self.nus*self.tau)**2))
     
-        self.phiLR = np.arctan(self.nus * self.tau)
+        self.phiLR = np.arctan(2*pi*self.nus * self.tau)
         
         self.EdotSphi = np.array([np.tan(phi)*betaomega*self.T/self.EF * \
                                  9*pi/self.kF**2/self.lambda_T**2 for phi, 
