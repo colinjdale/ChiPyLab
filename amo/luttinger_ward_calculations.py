@@ -7,30 +7,26 @@ import numpy as np
 # Haussmann, Rantner, Cerrito, Zwerger 2007; and Enss, Haussmann, Zwerger 2011
 # Density:  n=k_F^3/(3\pi^2)
 # columns:  T/T_F, mu/E_F, u/(E_F*n), s/(k_B*n), p/(E_F*n), C/k_F^4
-df = pd.read_csv(os.path.join('..', 'data', 'luttward-thermodyn.txt'), skiprows=4, sep=' ')
-xlabel = 'T/T_F'
-Clabel = 'C/(k_F*n)'
-
-# Calculate contact density
-df[Clabel] = df['C/k_F^4'] * 3*np.pi**2  # contact density c/(k_F n) = C/k_F^4 * (3 pi^2)
+C_file = 'luttward-thermodyn.txt'
+df_C = pd.read_csv(os.path.join('..', 'data', C_file), skiprows=4, sep=' ')
+x_label = 'T/T_F'
+C_label = 'C/k_F^4'
 
 
 def contact_density(ToTF):
-    """Functions that computes conatct density C/(k_F n) using
+    """Functions that interpolates contact density \mathcal{C}/(k_F^4) using
        tabulated data from Haussmann, Rantner, Cerrito, Zwerger 2007; 
-       and Enss, Haussmann, Zwerger 2011. 
-       Note data is tabulated as C/k_F^2, but we have used n=k_F^3/(3\pi^2)
-       to convert to density."""
-    return np.interp(ToTF, df[xlabel], df[Clabel])
+       and Enss, Haussmann, Zwerger 2011."""
+    return np.interp(ToTF, df_C[x_label], df_C[C_label])
 
 
-file = 'sumrule-bulk-ufg.txt'
-df2 = pd.read_csv(os.path.join('..', 'data', file), skiprows=3, sep=' ')
-Slabel = 'S(T)(k_Fa)^2/(n*EF)'
+S_file = 'sumrule-bulk-ufg.txt'
+df_S = pd.read_csv(os.path.join('..', 'data', S_file), skiprows=3, sep=' ')
+S_label = 'S(T)(k_Fa)^2/(n*EF)'
 
 
 def scale_susceptibility(ToTF):
     """Functions that computes scale susceptibility (k_F a)^2 S/(E_F n) using
        tabulated data from ???"""
-    return np.interp(ToTF, df2[xlabel], df2[Slabel])
+    return np.interp(ToTF, df_S[x_label], df_S[S_label])
 

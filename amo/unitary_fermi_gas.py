@@ -52,7 +52,7 @@ def zeta(betamu, betaomega):
     return betasumrule*bgamma/(betaomega**2 + bgamma**2)
 
 
-def sumrule(betamu):
+def betasumrule(betamu):
     """Sumrule in dimensionless units (via temperature)."""
     z = np.exp(betamu)
     sumrule = np.where(betamu<-4.8,0.36*z**(5/3), sumrat(z))  # Area under viscosity peak in units of T.
@@ -133,9 +133,9 @@ def sumrule_zetaint(nus, zetas):
 
 
 def tau_inv(betamu, T):
-    '''This is in units of angular frequency, 2pi Hz.'''
+    '''This is in units of frequency, Hz.'''
     z = np.exp(betamu)
-    tauinv = ((1.739 - 0.0892*z + 0.00156*z**2) * T) * (2*pi)
+    tauinv = ((1.739 - 0.0892*z + 0.00156*z**2) * T)
     return tauinv
 
 
@@ -166,7 +166,7 @@ class BulkViscUniform:
         self.C = contact_density(Theta(betamu))
         self.tau = 1/tau_inv(betamu, self.T)  # Scattering rate.
 
-        self.sumrule = sumrule(betamu) * self.T
+        self.sumrule = betasumrule(betamu) * self.T
         self.EdotbulksC = self.A**2 * np.array([heating_C(self.T, betaomega,
                     self.C*eos_ufg(betamu)**(4/3)) for betaomega in betaomegas])
 
@@ -183,9 +183,9 @@ class BulkViscUniform:
         self.phaseshiftsC = np.array([phaseshift_zeta(betaomega*T, zetaC, 
             self.sumruleintC) for betaomega, zetaC in zip(betaomegas, self.zetasC)])
         
-        self.phaseshiftsQcrit = np.arctan(2*np.pi*self.nus * self.tau / (1 + (2*np.pi*self.nus*self.tau)**2))
+        self.phaseshiftsQcrit = np.arctan(self.nus * self.tau / (1 + (self.nus*self.tau)**2))
 
-        self.phiLR = np.arctan(2*np.pi*self.nus * self.tau)
+        self.phiLR = np.arctan(self.nus * self.tau)
 
         self.betamu = betamu
 
@@ -245,13 +245,6 @@ def heating_trap(T, betamu, betaomega, betabaromega, weight_func=weight_harmonic
     return Edot 
 
 
-def tau_inv(betamu, T):
-    """This is in units of angular frequency, 2pi Hz."""
-    z = np.exp(betamu)
-    tauinv = ((1.739 - 0.0892*z + 0.00156*z**2) * T) * (2*pi)
-    return tauinv
-
-
 # unused; this gives weird results
 def heating_trap_sumrule(T, betamu, betaomega, betabaromega, weight_func=weight_harmonic):
     """compute viscous heating rate E-dot averaged over the trap normalized by scale sus"""
@@ -306,21 +299,26 @@ def find_betamu(T, ToTF, betabaromega, weight_func=weight_harmonic, mu_guess=Non
 
 def sumrule_trap(betamu, betabaromega, weight_func=weight_harmonic):
     """Sumrule in temperature units."""
-    sumruleT, sumruleTerr = quad(lambda v: weight_func(v, betabaromega)*sumrule(betamu-v), 0, np.inf, epsrel=eps)
+    sumruleT, sumruleTerr = quad(lambda v: weight_func(v, betabaromega)*betasumrule(betamu-v), 0, np.inf, epsrel=eps)
     return sumruleT
 
 
 def C_trap(betamu, betabaromega, weight_func=weight_harmonic):
-    """Compute Contact Density averaged over the trap."""
-    Ctrap, Ctraperr = quad(lambda v: weight_func(v, betabaromega)*eos_ufg(betamu-v)**(4/3)*contact_density(Theta(betamu-v)), 0, np.inf, epsrel=eps)
+    """Compute Contact Density averaged over the trap.
+        TO DO: This is not true because it's missing a bunch of factors."""
+    Ctrap, Ctraperr = quad(lambda v: weight_func(v, betabaromega) \
+                            * eos_ufg(betamu-v)**(4/3) \
+                            * contact_density(Theta(betamu-v)), 0, np.inf, epsrel=eps)
     return Ctrap
 
 
-def C_slope_trap(betamu, betabaromega, weight_func=weight_harmonic):
+def dC_dkFa_inv_trap(betamu, betabaromega, weight_func=weight_harmonic):
     """Compute d \tilde C/d((kF a)^-1) averaged over the trap."""
-    integral, err = quad(lambda v: weight_func(v, betabaromega) * eos_ufg(betamu-v) * scale_susceptibility(Theta(betamu-v)), 0, np.inf, epsrel=eps)
+    integral, err = quad(lambda v: weight_func(v, betabaromega) \
+                        * eos_ufg(betamu-v) \
+                        * scale_susceptibility(Theta(betamu-v)), 0, np.inf, epsrel=eps)
     Ns = number_per_spin(betamu, betabaromega, weight_func)
-    return 18*pi * integral / Ns
+    return 18*pi * integral / (2*Ns)
 
 
 class TrappedUnitaryGas:
@@ -335,11 +333,11 @@ class TrappedUnitaryGas:
         self.betabaromega = barnu/self.T
         
         # Find betamutrap that produces correct ToTF given EF, ToTF and betabaromega.
-        self.betamutrap, _ = find_betamu(self.T, ToTF, self.betabaromega)
+        self.betamu, _ = find_betamu(self.T, ToTF, self.betabaromega)
 
         # Compute trap properties
-        self.tau = 1/tau_inv(self.betamutrap, self.T)
-        self.Ns, self.EF, self.Theta, self.Epot = thermo_trap(self.T, self.betamutrap, self.betabaromega)
+        self.tau = 1/tau_inv(self.betamu, self.T)
+        self.Ns, self.EF, self.Theta, self.Epot = thermo_trap(self.T, self.betamu, self.betabaromega)
 
         # Self-consistency checks of EF and Theta:
         rtol = 1e-2  # Within 1%
@@ -351,23 +349,35 @@ class TrappedUnitaryGas:
         self.kF = np.sqrt(2*mK*(2*pi)*self.EF/hbar)  # Global k_F, i.e. peak k_F
         self.Etotal = 2*self.Epot  # Virial theorem valid at unitarity
 
+        self.calc_contact()
+
         if verbose:
             print(f"A trapped unitary gas with EF={EF:.0f}Hz, T/TF={ToTF:.2f} and barnu={barnu:.0f}Hz")
-            print(f"has T={self.T:.0f}Hz, kF={self.kF:.2e} m^-1, lambda_T={self.lambda_T:.2e}m, mu={self.betamutrap*self.T:.0f}Hz")
+            print(f"has T={self.T:.0f}Hz, kF={self.kF:.2e} m^-1, lambda_T={self.lambda_T:.2e}m, mu={self.betamu*self.T:.0f}Hz")
             print(f"tau={self.tau:.2e}s, Ns={self.Ns:.0f}, Ntotal={2*self.Ns:.0f}, Epot={self.Epot:.0f}Hz.")
 
     
-    def contact(self):
+    def calc_contact(self, weight_func=weight_harmonic):
         """Calculates the harmonic trap-averaged contact using ToTF, EF, barnu
         (geometric mean trap freq) and an optional guess mu. Returns the contact."""
-        self.Ctrap =  C_trap(self.betamutrap, self.betabaromega)/(self.kF*self.lambda_T)\
-                        *(3*pi**2)**(1/3)/self.Ns/2
+        integral, _ = quad(lambda v: weight_func(v, self.betabaromega) \
+                           *eos_ufg(self.betamu-v)**(4/3) \
+                            *contact_density(Theta(self.betamu-v)), 0, np.inf, epsrel=eps)
+        self.Ctrap = integral/(self.kF*self.lambda_T)*(3*pi**2)**(4/3)/(2*self.Ns)
         return self.Ctrap
     
 
-    def cdfs(self):
-        """Calculates various cumulative distribution functions."""
+    def calc_dC_dkFa_inv(self, weight_func=weight_harmonic):
+        """Compute d \tilde C/d((kF a)^-1) averaged over the trap."""
+        integral, _ = quad(lambda v: weight_func(v, self.betabaromega) \
+                            * eos_ufg(self.betamu-v) \
+                            * scale_susceptibility(Theta(self.betamu-v)), 0, np.inf, epsrel=eps)
+        return 18*pi * integral / (2*self.Ns)
+    
 
+    def calc_distributions(self):
+        """Calculates various distributions of gas parameters in the trap."""
+        return ...
 
 
     def modulate_field(self, nus, a0=None):
@@ -379,12 +389,11 @@ class TrappedUnitaryGas:
         betaomegas = self.nus/self.T
               
         # but we have to decide if we want to normalize the trap heating rate by the total or by the internal energy
-        self.EdotDrude = self.A**2*np.array([heating_trap(self.T,self.betamutrap,
+        self.EdotDrude = self.A**2*np.array([heating_trap(self.T,self.betamu,
                         betaomega,self.betabaromega) for betaomega in betaomegas])
         
-        self.ns = psd_trap(self.betamutrap,self.betabaromega)/self.Ns # /self.lambda_T**3
+        self.ns = psd_trap(self.betamu,self.betabaromega)/self.Ns # /self.lambda_T**3
     
-        self.contact()
         self.EdotC = self.A**2*np.array([heating_C(self.T,betaomega, self.Ctrap) for betaomega in betaomegas])
         self.EdotNormC = self.A**2*np.array([heating_C(self.T,betaomega, (self.kF*self.lambda_T)/(3*pi**2)**(1/3)) for betaomega in betaomegas])
         
@@ -392,14 +401,14 @@ class TrappedUnitaryGas:
         self.zetaDrude = self.EdotDrude/self.A**2 * (self.lambda_T**2*self.kF**2)/(9*pi*nus**2*2*self.Ns)
         self.zetaC = self.EdotC/self.A**2 * (self.lambda_T**2*self.kF**2)/(9*pi*nus**2*2*self.Ns)
         
-        self.sumruletrap = sumrule_trap(self.betamutrap, self.betabaromega) * self.T/self.EF
+        self.sumruletrap = sumrule_trap(self.betamu, self.betabaromega) * self.T/self.EF
         
         self.EdotDrudeS = self.EdotDrude / self.sumruletrap
-        self.EdotDrudeSalt = self.A**2*np.array([heating_trap_sumrule(self.T,self.betamutrap, 
+        self.EdotDrudeSalt = self.A**2*np.array([heating_trap_sumrule(self.T,self.betamu, 
                             betaomega, self.betabaromega) for betaomega in betaomegas])
-        self.phaseshiftsQcrit = np.arctan(2*np.pi*self.nus * self.tau / (1 + (2*np.pi*self.nus*self.tau)**2))
+        self.phaseshiftsQcrit = np.arctan(self.nus * self.tau / (1 + (self.nus*self.tau)**2))
     
-        self.phiLR = np.arctan(2*np.pi*self.nus * self.tau)
+        self.phiLR = np.arctan(self.nus * self.tau)
         
         self.EdotSphi = np.array([np.tan(phi)*betaomega*self.T/self.EF * \
                                  9*pi/self.kF**2/self.lambda_T**2 for phi, 
@@ -419,11 +428,11 @@ class TrappedUnitaryGas:
     def calc_Edot(self, nu):
         betaomega = nu/self.T
         if betaomega < 2:
-            Edot = self.A**2 * heating_trap(self.T, self.betamutrap,
+            Edot = self.A**2 * heating_trap(self.T, self.betamu,
                             betaomega, self.betabaromega)
         else:
             Edot = self.A**2*heating_C(self.T,betaomega, 
-                  C_trap(self.betamutrap, self.betabaromega))
+                  C_trap(self.betamu, self.betabaromega))
         return Edot/(2*self.Ns * self.EF**2)
     
     def calc_zeta(self, nu):
@@ -440,14 +449,14 @@ def trap_averaged_contact(ToTF, EF, barnu):
     lambda_T = np.sqrt(hbar/(mK*T))
     kF = np.sqrt(2*mK*(2*pi)*EF/hbar)  # Global k_F, here peak k_F of harmonic trap
     
-    betamutrap, no_iter = find_betamu(T, ToTF, betabaromega)
+    betamu, no_iter = find_betamu(T, ToTF, betabaromega)
     
     # Calculate number of atoms in one spin.
     Ns = (EF/barnu)**3/6
     
     # Calculate C
-    Ctrap =  C_trap(betamutrap, betabaromega)/(kF*lambda_T)* \
-                (3*pi**2)**(1/3)/Ns/2
+    Ctrap =  C_trap(betamu, betabaromega)/(kF*lambda_T)* \
+                (3*pi**2)**(4/3)/Ns/2
                 
     return Ctrap
 
@@ -457,11 +466,11 @@ def trap_averaged_contact_slope(ToTF, EF, barnu):
        (geometric mean trap freq) and an optional guess mu. Returns the contact."""
     T = ToTF * EF
     betabaromega = barnu/T
-    kF = np.sqrt(4*pi*mK*EF/hbar)  # Global k_F, here peak k_F of harmonic trap
+    kF = np.sqrt(2*mK*(2*pi)*EF/hbar)  # Global k_F, here peak k_F of harmonic trap
     betamutrap, no_iter = find_betamu(T, ToTF, betabaromega)
     
     # Calculate C slope
-    C_slope =  C_slope_trap(betamutrap, betabaromega)
+    C_slope =  dC_dkFa_inv_trap(betamutrap, betabaromega)
     return C_slope
 
 
