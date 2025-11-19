@@ -27,6 +27,6 @@ S_label = 'S(T)(k_Fa)^2/(n*EF)'
 
 def scale_susceptibility(ToTF):
     """Functions that computes scale susceptibility (k_F a)^2 S/(E_F n) using
-       tabulated data from ???"""
+       tabulated data from Tilman 2019."""
     return np.interp(ToTF, df_S[x_label], df_S[S_label])
 

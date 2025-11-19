@@ -132,7 +132,7 @@ def sumrule_zetaint(nus, zetas):
     return sumrule
 
 
-def tau_inv(betamu, T):
+def gamma(betamu, T):
     '''This is in units of frequency, Hz.'''
     z = np.exp(betamu)
     tauinv = ((1.739 - 0.0892*z + 0.00156*z**2) * T)
@@ -164,7 +164,7 @@ class BulkViscUniform:
                                         betaomega) for betaomega in betaomegas])
         
         self.C = contact_density(Theta(betamu))
-        self.tau = 1/tau_inv(betamu, self.T)  # Scattering rate.
+        self.tau = 1/gamma(betamu, self.T)  * 2*pi # Scattering rate.
 
         self.sumrule = betasumrule(betamu) * self.T
         self.EdotbulksC = self.A**2 * np.array([heating_C(self.T, betaomega,
@@ -251,14 +251,14 @@ def heating_trap_sumrule(T, betamu, betaomega, betabaromega, weight_func=weight_
      
           # Strap,Straperr = quad(lambda v: weight_func(v,
     #                betabaromega)*eos_ufg(betamu-v)**(1/3)*sumrule(betamu-v),0,np.inf,epsrel=1e-4)
-    tau = 1/tau_inv(betamu, T) # inverse scattering rate
+    tau = 1/gamma(betamu, T) # inverse scattering rate
     drude_form = tau / (1 + (2*pi*betaomega*T*tau)**2)
     Edot = 9*np.pi*(T*betaomega)**2/(3*np.pi**2)**(2/3)*drude_form
     return Edot 
 
 # def phaseshift_qcrit(T, betaomega, betamu):
 #     """phi = arctan(omegatau/(1+(omegatau**2)) Eq.(30) in May note"""
-#     tau = 1/tau_inv(betamu, T)
+#     tau = 1/gamma(betamu, T)
 #     phiqcrit = np.arctan((2*pi*betaomega)*T * tau / (1 + (2*pi*betaomega*T*tau)**2))
 #     return phiqcrit
 
@@ -275,7 +275,7 @@ def phaseshift_arg_trap(betamu, betaomega, betabaromega, weight_func=weight_harm
 
 # def phiLR(T, betaomega, betamu):
 #     """phi = arctan(omegatau) based on LR theory"""
-#     tau = 1/tau_inv(betamu, T)
+#     tau = 1/gamma(betamu, T)
 #     phiLR = np.arctan(2*pi*betaomega*T * tau)
 #     return phiLR
 
@@ -335,7 +335,8 @@ class TrappedUnitaryGas:
         self.betamu, _ = find_betamu(self.T, ToTF, self.betabaromega)
 
         # Compute trap properties
-        self.tau = 1/tau_inv(self.betamu, self.T)
+        self.gamma = gamma(self.betamu, self.T)
+        self.tau = 1/self.gamma * 2*pi
         self.Ns, self.EF, self.Theta, self.Epot = thermo_trap(self.T, self.betamu, self.betabaromega)
 
         # Self-consistency checks of EF and Theta:
