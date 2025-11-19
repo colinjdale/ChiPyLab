@@ -303,9 +303,8 @@ def sumrule_trap(betamu, betabaromega, weight_func=weight_harmonic):
     return sumruleT
 
 
-def C_trap(betamu, betabaromega, weight_func=weight_harmonic):
-    """Compute Contact Density averaged over the trap.
-        TO DO: This is not true because it's missing a bunch of factors."""
+def C_trap_int(betamu, betabaromega, weight_func=weight_harmonic):
+    """Contact Density integral, missing some factors."""
     Ctrap, Ctraperr = quad(lambda v: weight_func(v, betabaromega) \
                             * eos_ufg(betamu-v)**(4/3) \
                             * contact_density(Theta(betamu-v)), 0, np.inf, epsrel=eps)
@@ -432,7 +431,7 @@ class TrappedUnitaryGas:
                             betaomega, self.betabaromega)
         else:
             Edot = self.A**2*heating_C(self.T,betaomega, 
-                  C_trap(self.betamu, self.betabaromega))
+                  C_trap_int(self.betamu, self.betabaromega))
         return Edot/(2*self.Ns * self.EF**2)
     
     def calc_zeta(self, nu):
@@ -455,7 +454,7 @@ def trap_averaged_contact(ToTF, EF, barnu):
     Ns = (EF/barnu)**3/6
     
     # Calculate C
-    Ctrap =  C_trap(betamu, betabaromega)/(kF*lambda_T)* \
+    Ctrap =  C_trap_int(betamu, betabaromega)/(kF*lambda_T)* \
                 (3*pi**2)**(4/3)/Ns/2
                 
     return Ctrap
