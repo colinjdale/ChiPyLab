@@ -139,7 +139,7 @@ def q2d_pwave_ln_inverse_effective_range(inv_R3D, a_osc):
 
 def q2d_swave_ln_scattering_length_squared(V3D, inv_R3D, a_osc):
     """This is ln(a_osc^2/a_2D,s^2), as defined in [3]."""
-    return np.sqrt(pi)/6 * (a_osc**3/V3D + 3*inv_R3D*a_osc**2) + np.log(2*B_2ds/pi)
+    return np.sqrt(pi)/6 * (a_osc**3/V3D + 3*inv_R3D*a_osc) + np.log(2*B_2ds/pi)
 
 
 def q2d_swave_effective_range(inv_R3D, a_osc):
