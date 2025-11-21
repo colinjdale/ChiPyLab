@@ -27,12 +27,6 @@ def fermi_wavevector(n, omega_bar, dim=3, pol=1):
     return np.sqrt(2 * mK * fermi_energy(n, omega_bar, dim=dim, pol=pol))
 
 
-def recoil_energy(lambda_):
-    """Computes the recoil energy in Joules for a given wavelength 
-    lambda (in meters)."""
-    return h**2 / (2 * mK * lambda_**2)
-
-
 def oscillator_length(omega):
     """Computes the harmonic oscillator length in meters for a given trap 
     frequency omega (in rad/s)."""
