@@ -67,14 +67,14 @@ R_max = 1.162 * r_vdW  # (m)
 ### Feshbach resonance parameters
 
 # s-wave resonance at 202.1 G between |9/2,-9/2> and |9/2,-7/2>
+B0_97 = 202.10  # (G)
 abg_97 = 167 * a_0 
 DeltaB_97 = 6.9  # (G)
-B0_97 = 202.10  # (G)
 Bzero_97 = 209.115  # (G)
 
 # s-wave resonance at 224.2 G between |9/2,-9/2> and |9/2,-5/2>
-abg_95 = 174 * a_0
 B0_95 = 224.2  # (G)
+abg_95 = 174 * a_0
 DeltaB_95 = 7.2  # (G)
 
 # p-wave resonance at 198.3 and 198.8 G between |9/2,-7/2> and |9/2,-7/2> [3]

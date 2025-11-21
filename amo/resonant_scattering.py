@@ -37,13 +37,12 @@ def scattering_volume(B, B0, DeltaB, Vbg):
 
 
 def inv_R_vdW(V, R_max=R_max, V_bar=V_bar):
-    """Van der Waals limit of effective range.
-    From [1]."""
+    """Van der Waals limit of effective range from [1]."""
     return 1/R_max * (1 + 2*(V_bar/V) + 2*V_bar**2/V**2)
 
 
 def inverse_effective_range(V, R0, Vbg, R_max=R_max):
-    """From [2]."""
+    """Effective range parameterization from [2]."""
     width_param = -R0/(R_max - R0)
     return -1/(R_max * width_param) * (1-Vbg/V)**2 + inv_R_vdW(V)
 
@@ -60,10 +59,11 @@ def pwave_phase_shift(k, V, inv_R):
 def pwave_scattering_amplitude(k, V, inv_R):
     """Computes the p-wave scattering amplitude f_1 (in meters) for a 
     given wavevector k (in 1/m), scattering volume V (in m^3), and 
-    effective range R (in m)."""
+    inverse effective range 1/R (in 1/m)."""
     delta1 = pwave_phase_shift(k, V, inv_R)
     f1 = 1/k*np.exp(1j * delta1) * np.sin(delta1)
     return f1
+
 
 ### p-wave bound state energy
 
