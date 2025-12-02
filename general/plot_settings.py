@@ -71,12 +71,12 @@ styles = [{'color':dark_color, 'mec':dark_color, 'mfc':light_color,
 						   zip(dark_colors, light_colors, markers)]
 	
 	
-def generate_plt_styles(colors, markers=markers, ts=tintshade):
+def generate_plt_styles(colors=colors, markers=markers, ts=tintshade):
 	""" Generates style dictionary for use in plt.plot and plt.errorbar """
 	light_colors = [tint_shade_color(color, amount=1+ts) for color in colors]
 	dark_colors = [tint_shade_color(color, amount=1-ts) for color in colors]
 	styles = [{'color':dark_color, 'mec':dark_color, 'mfc':light_color,
-					 'marker':marker} for dark_color, light_color, marker in \
+				'marker':marker, 'linestyle':''} for dark_color, light_color, marker in \
 						   zip(dark_colors, light_colors, markers)]
 	return styles
 	
