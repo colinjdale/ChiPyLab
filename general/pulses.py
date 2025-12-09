@@ -39,5 +39,5 @@ def blackman_fourier(nu, t_width, alpha=0.16):
 def blackman_instrument(nu, t_width):
     """Analytic solution of the Blackman Fourier transform. Obtained from
        https://mathworld.wolfram.com/BlackmanFunction.html."""
-    return 4 * t_width * (0.42 - 0.18/4 * t_width**2 * nu**2)*np.sinc(t_width * nu) \
-            / ((4 - t_width**2 * nu**2) * (1 - t_width**2 * nu**2))
+    return t_width * (0.42 - 0.18/4 * t_width**2 * nu**2)*np.sinc(t_width * nu) \
+            / ((1 - t_width**2 * nu**2/4) * (1 - t_width**2 * nu**2))
