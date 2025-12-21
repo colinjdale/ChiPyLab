@@ -31,14 +31,36 @@ def blackman_seq_func(amp):
     return blackman_seq
 
 
-def segment_plot(x, func_list, y_f_list, y_i=0):
-    y = np.zeros_like(x)
+def segment_y(x_seg, func_list, y_f_list, y_i=0):
     y_i_list = [y_i] + y_f_list[:-1]
-    for i, xi in enumerate(x):
-        seg = int(np.floor(xi))
-        frac = xi - seg
-        y[i] = func_list[seg](frac, y_f_list[seg], y_i_list[seg])
-    return y
+
+    x_list = []
+    y_list = []
+
+    seg = 0
+    x_edges = [0]
+    while seg < len(func_list):
+        y = [func_list[seg](xi, y_f_list[seg], y_i_list[seg]) for xi in x_seg]
+        y_list = y_list + y
+
+        seg += 1
+    
+    return y_list
+
+
+def segment_x(x_seg, scale_list):
+    x_list = []
+    seg = 0
+    x_edges = [0]
+    while seg < len(scale_list):
+        x = x_edges[seg] + x_seg * scale_list[seg]
+        x_edges = x_edges + [x[-1]]
+        x_list = x_list + list(x)
+        seg += 1
+
+    x_edges = np.array(x_edges)
+    
+    return (x_list, x_edges)
 
 
 seq_func_mapping = {'linear': linear_seq,
@@ -48,7 +70,7 @@ seq_func_mapping = {'linear': linear_seq,
                     }
 
 
-def calculate_sequence(df, x, seq_func_mapping=seq_func_mapping):
+def calculate_sequence(df, seq_func_mapping=seq_func_mapping, num=1000):
     # Forward fill value columns
     v_cols = [c for c in df.columns if "_val" in c]
     df[v_cols] = df[v_cols].ffill()
@@ -57,10 +79,18 @@ def calculate_sequence(df, x, seq_func_mapping=seq_func_mapping):
     f_cols = [c for c in df.columns if "_func" in c]
     df[f_cols] = df[f_cols].fillna("constant")
 
+    # Get scaling columns, fill blank with 1.0
+    df['scale'] = df['scale'].fillna(1.0)
+
     # Replace all function name strings with functions
     df = df.replace(seq_func_mapping)
 
-    # Calculate values
-    ys = [segment_plot(x, list(df[pf]), list(df[pv])) for pf, pv in zip(f_cols, v_cols)]
+    x = np.linspace(1/num, 1, num)
 
-    return ys, df
+    # Calculate values
+    y = [segment_y(x, list(df[pf]), list(df[pv])) \
+          for pf, pv in zip(f_cols, v_cols)]
+    
+    x, x_edges = segment_x(x, list(df['scale']))
+
+    return x, y, x_edges, df
