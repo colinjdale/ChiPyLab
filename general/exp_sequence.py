@@ -33,18 +33,15 @@ def blackman_seq_func(amp):
 
 def segment_y(x_seg, func_list, y_f_list, y_i=0):
     y_i_list = [y_i] + y_f_list[:-1]
-
-    x_list = []
     y_list = []
 
     seg = 0
-    x_edges = [0]
     while seg < len(func_list):
         y = [func_list[seg](xi, y_f_list[seg], y_i_list[seg]) for xi in x_seg]
         y_list = y_list + y
-
         seg += 1
-    
+
+    y_list = np.array(y_list)
     return y_list
 
 
@@ -59,7 +56,7 @@ def segment_x(x_seg, scale_list):
         seg += 1
 
     x_edges = np.array(x_edges)
-    
+    x_list = np.array(x_list)
     return (x_list, x_edges)
 
 
