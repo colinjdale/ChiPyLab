@@ -10,6 +10,7 @@ import numpy as np
 from amo.constants import R_max, V_bar, pi, hbar, mK
 from scipy.special import zeta
 from scipy.optimize import root_scalar
+from functools import partial
 
 zeta_m1_2 = zeta(-0.5)
 zeta_1_2 = zeta(0.5)
@@ -77,6 +78,20 @@ def pwave_bound_state_energy(V, inv_R):
         kappa = np.real(roots[np.isreal(roots) & (np.real(roots) < 0)][0])
         E_b = hbar**2 * kappa**2 / mK
         return E_b
+    
+
+### For 40K
+from amo.constants import B0_77_pm1, DeltaB_77_pm1, Vbg_77_pm1, R0_77_pm1, \
+                            B0_77_0, DeltaB_77_0, Vbg_77_0, R0_77_0
+
+V3D = partial(scattering_volume, B0=B0_77_pm1, DeltaB=DeltaB_77_pm1, Vbg=Vbg_77_pm1)  # Functions of B.
+inv_R3D = lambda B: inverse_effective_range(V3D(B), R0=R0_77_pm1, Vbg=Vbg_77_pm1)  # Function of V.
+
+V3D_m0 = partial(scattering_volume, B0=B0_77_0, DeltaB=DeltaB_77_0, Vbg=Vbg_77_0)  # Functions of B.
+inv_R3D_m0 = lambda B: inverse_effective_range(V3D_m0(B), R0=R0_77_0, Vbg=Vbg_77_0)  # Function of V.
+
+Eb3D = lambda B: pwave_bound_state_energy(V3D(B), inv_R3D(B))
+Eb3D_m0 = lambda B: pwave_bound_state_energy(V3D_m0(B), inv_R3D_m0(B))
 
 
 ###
@@ -145,3 +160,30 @@ def q2d_swave_ln_scattering_length_squared(V3D, inv_R3D, a_osc):
 def q2d_swave_effective_range(inv_R3D, a_osc):
     """The q2D s-wave effective range has units of area (m^2), from [3]."""
     return np.sqrt(pi)*a_osc**3*inv_R3D/6 + gamma_2ds * a_osc**2/4
+
+
+def q2d_reference_field(m, omega_perp, geometry='z', B_guess=199.0):
+    """Reference field B^*_m for geometry 'z' or 'x' and 
+    interaction symmetry m = 0 (p) or 1 (s).
+    If you want the y resonance position in the x geometry, 
+    use m=0 in the 'z' geometry.
+    """
+    E_shift = (1/2 + m) * hbar * omega_perp
+
+    if geometry == 'z':
+        if m == 0:
+            zero_func = lambda B: Eb3D(B) + E_shift
+        elif m == 1:  # Use m=0 res for s-wave case, since z-confinement
+            zero_func = lambda B: Eb3D_m0(B) + E_shift 
+        else:
+            raise ValueError("m must be 0 or 1.")
+    elif geometry == 'x':
+        if m == 0:
+            zero_func = lambda B: Eb3D_m0(B) + E_shift
+        elif m == 1:
+            zero_func = lambda B: Eb3D(B) + E_shift
+        else:
+            raise ValueError("m must be 0 or 1.")
+
+    root_results = root_scalar(zero_func, x0=B_guess, x1=B_guess+1.0)
+    return root_results.root
