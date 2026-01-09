@@ -1,0 +1,6 @@
+'2025-07-16_I_e.dat', # 209 G pol b's into c's
+#'2025-07-16_J_e.dat', # 209 G ab spin mix into c's
+#'2025-07-16_K_e.dat'] # 202.14 G ab spin mix into c's,
+'2025-07-18_I_e.dat', # 209 G ab spin mix into c's, only diff 07-16_J is date taken
+'2025-07-18_H_e.dat',# 202.14 G ab spin mix into C's but fr this time,
+'2025-07-17_B_e.dat'
