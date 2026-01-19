@@ -11,6 +11,10 @@ def recoil_energy(lambda_=lambda_lattice, m=mK):
     return h**2 / (2 * m * lambda_**2)
 
 
+def harmonic_frequency(s, lambda_=lambda_lattice, m=mK):
+    return recoil_energy(lambda_, m) * 2 * np.sqrt(s) / h
+
+
 def lattice_hamiltonian(s, q=0.0, FO=18):
     r"""Hamiltonian matrix in the plane wave basis for a particle in a periodic
     potential. The wavefunction in the plane wave basis is expanded in $N$ Fourier modes,
@@ -75,6 +79,7 @@ class Lattice:
         self.N = 2 * FO - 1
         self.H = lattice_hamiltonian(s, q, FO)
         self.En = band_energies(self.H)
+        self.harmonic_energy_gap = harmonic_frequency(s, lambda_=lambda_lattice)*h/self.ER
 
 
     def band_gap(self, i, j):
