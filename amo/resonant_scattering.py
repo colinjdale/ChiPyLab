@@ -28,6 +28,11 @@ def scattering_length(B, B0, DeltaB, abg):
     abg (in a0 typically)."""
     return abg * (1 - DeltaB / (B - B0))
 
+def swave_bound_state_energy(a):
+    """Computes the s-wave bound state energy (in Joules) for a given 
+    scattering length a (in meters)."""
+    return - hbar**2 / (2 * mK * a**2)
+
 
 ###
 ### p-Wave scattering parameters
@@ -102,7 +107,12 @@ def quasibound_state_halfwidth(V, inv_R):
 
 ### For 40K
 from amo.constants import B0_77_pm1, DeltaB_77_pm1, Vbg_77_pm1, R0_77_pm1, \
-                            B0_77_0, DeltaB_77_0, Vbg_77_0, R0_77_0
+                            B0_77_0, DeltaB_77_0, Vbg_77_0, R0_77_0, \
+                            B0_97, DeltaB_97, abg_97
+
+a97 = partial(scattering_length, B0=B0_97, DeltaB=DeltaB_97, abg=abg_97)  # Functions of B.
+Eb_s97 = lambda B: swave_bound_state_energy(a97(B))  # Functions of B.
+
 
 V3D = partial(scattering_volume, B0=B0_77_pm1, DeltaB=DeltaB_77_pm1, Vbg=Vbg_77_pm1)  # Functions of B.
 inv_R3D = lambda B: inverse_effective_range(V3D(B), R0=R0_77_pm1, Vbg=Vbg_77_pm1)  # Function of V.

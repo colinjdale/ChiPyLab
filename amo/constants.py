@@ -67,10 +67,10 @@ R_max = 1.162 * r_vdW  # (m)
 ### Feshbach resonance parameters
 
 # s-wave resonance at 202.1 G between |9/2,-9/2> and |9/2,-7/2>
-B0_97 = 202.10  # (G)
-abg_97 = 167 * a_0 
-DeltaB_97 = 6.9  # (G)
-Bzero_97 = 209.115  # (G)
+B0_97 = 202.14  # (G) from Shkedrov PRL 121 093402 (2018)
+abg_97 = 166.978 * a_0  # from Ahmed-Braun PRR 3, 033269 (2021)
+DeltaB_97 = 6.910  # (G) from Ahmed-Braun PRR 3, 033269 (2021)
+Bzero_97 = 209.07  # (G) from Smale SCi Adv 5, eaax1568 (2019)
 
 # s-wave resonance at 224.2 G between |9/2,-9/2> and |9/2,-5/2>
 B0_95 = 224.2  # (G)
