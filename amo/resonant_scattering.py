@@ -79,6 +79,26 @@ def pwave_bound_state_energy(V, inv_R):
         E_b = hbar**2 * kappa**2 / mK
         return E_b
     
+def EB_3D(V, inv_R):
+    # Calculate both mathematical branches for the whole array
+    # Branch 1: V < 0
+    E_negative_V = -hbar**2 / (mK * V * inv_R)
+    
+    # Branch 2: V > 0
+    # Based on your np.roots logic: kappa^2 = -1 / (V * inv_R)
+    # We use np.abs or care with signs to ensure we handle the physical branch
+    kappa_sq = -1.0 / (V * inv_R)
+    E_positive_V = (hbar**2 * kappa_sq) / mK
+    
+    # Use np.where to pick the correct value based on V
+    return np.where(V < 0, E_negative_V, E_positive_V)
+
+def quasibound_state_halfwidth(V, inv_R):
+    E0 = -hbar**2 / (mK * V * inv_R)
+    ER = hbar**2 / mK * inv_R**2
+    Gamma = E0**(3/2) / np.sqrt(ER) 
+    return np.where(V >= 0, 0.0, Gamma)
+    
 
 ### For 40K
 from amo.constants import B0_77_pm1, DeltaB_77_pm1, Vbg_77_pm1, R0_77_pm1, \
