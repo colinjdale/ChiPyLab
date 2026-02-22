@@ -48,7 +48,7 @@ LambdaD1 = 770.108136507e-9  # (m)
 LambdaD2 = 766.700674872e-9  # (m)
 NuD1, NuD2 = (c / LambdaD1, c / LambdaD2)
 kD1, kD2 = (2 * pi / LambdaD1, 2 * pi / LambdaD2)
-GammaD1 = 2 * pi * 6.035e6  # (Hz)
+GammaD1 = 2 * pi * 5.956e6  # (Hz)
 GammaD2 = 2 * pi * 6.035e6  # (Hz)
 
 
